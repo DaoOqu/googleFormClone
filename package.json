@@ -12,10 +12,13 @@
     "nanoid": "nanoid --alphabet 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz --size 11"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.2",
     "nanoid": "^4.0.0",
     "papercss": "^1.9.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^6.8.0"
   },
   "devDependencies": {
     "@originjs/vite-plugin-content": "^1.0.2",
