@@ -1,3 +1,28 @@
 id: gYI0RNGB6Vz
 name: Order Request
 published: true
+questions:
+  - tag: singleChoice
+    question:
+      title: Are you a new or existing customer?
+      description:
+      required: false
+      definition:
+        - I am a new customer
+        - I am an existing customer
+  - tag: shortText
+    question:
+      title: What is the item you would like to order?
+      description: Please enter the product number
+      required: true
+      definition:
+  - tag: multipleChoice
+    question:
+      title: What color(s) would you like to order?
+      description:
+      required: false
+      definition:
+        - Red
+        - Blue
+        - Green
+        - Yellow

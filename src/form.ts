@@ -29,48 +29,29 @@ export type Form = {
 }
 
 export type FormQuestion =
-  | { tag: 'shorText'; question: ShortTextQuestion }
-  | { tag: 'longText'; question: LongTextQuestion }
-  | { tag: 'singleChoice'; question: SingleChoiceQuestion }
-  | { tag: 'multipleChoice'; question: MultipleChoiceQuestion }
-  | { tag: 'scale'; question: ScaleQuestion }
+  | { tag: 'shorText'; question: Question<ShortText> }
+  | { tag: 'longText'; question: Question<LongText> }
+  | { tag: 'singleChoice'; question: Question<SingleChoice> }
+  | { tag: 'multipleChoice'; question: Question<MultipleChoice> }
+  | { tag: 'scale'; question: Question<Scale> }
 
-export type ShortTextQuestion = {
+
+export type Question<T> = {
   title: string
   description: string | null
   required: boolean
+  definition: T
 }
 
-export type LongTextQuestion = {
-  title: string
-  description: string | null
-  required: boolean
-}
+export type ShortText = null
 
-export type SingleChoiceQuestion = {
-  title: string
-  description: string | null
-  required: boolean
-  choices: Array <{
-    id: ChoiceId
-    value: string
-  }>
-}
+export type LongText = null
 
-export type MultipleChoiceQuestion = {
-  title: string
-  description: string | null
-  required: boolean
-    choices: Array <{
-    id: ChoiceId
-    value: string
-  }>
-}
+export type SingleChoice = Array<string>
 
-export type ScaleQuestion = {
-  title: string
-  description: string | null
-  required: boolean
+export type MultipleChoice = Array<string>
+
+export type Scale = {
   start: number
   end: number
   startLabel: string
