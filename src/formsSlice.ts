@@ -1,7 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from './store'
 import { formsData } from './data'
-import { Form, FormId } from './form'
+import { Form, FormId, generateFormId } from './form'
 
 type FormsState = { [key: FormId]: Form };
 
@@ -10,8 +10,41 @@ const initialState: FormsState = formsData
 export const formsSlice = createSlice({
   name: 'forms',
   initialState,
-  reducers: {},
+  reducers: {
+    formAdded: {
+      reducer: (state, action: PayloadAction<{ id: FormId; name: string }>) => {
+        const { id, name } = action.payload
+        const form: Form = {
+          id: id,
+          name: name,
+          published: false,
+        }
+        state[id] = form
+      },
+      prepare: (name: string) => {
+        return {
+          payload: {
+            id: generateFormId(),
+            name: name,
+          },
+        }
+      },
+    },
+
+    formSettingsUpdated: (
+      state,
+      action: PayloadAction<{ id: FormId; name: string; published: boolean }>
+    ) => {
+      const { id, name, published } = action.payload
+      state[id].name = name
+      state[id].published = published
+    }
+  },
 })
+
+export const {
+  formSettingsUpdated,
+} = formsSlice.actions
 
 export const selectFormById = (state: RootState, id: FormId): Form => {
   const result = state.forms[id];
@@ -26,3 +59,4 @@ export const selectallFormsSortByName = (state: RootState): Array<Form> => {
 }
 
 export const formsReducer = formsSlice.reducer
+export const { formAdded } = formsSlice.actions
