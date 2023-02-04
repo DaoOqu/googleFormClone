@@ -6,6 +6,7 @@ import FormSettings from './FormSettings'
 import FormQuestions from './FormQuestions'
 import FormResponses from './FormResponses'
 import Account from './Account'
+import FormCreate from './FormCreate'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route index element={<Navigate to="forms" replace />} />
         <Route path="forms">
           <Route index element={<Forms />} />
+          <Route path="new" element={<FormCreate />} />
           <Route path=":formId" element={<FormLayout />}>
             <Route index element={<Navigate to="settings" replace />} />
             <Route path="settings" element={<FormSettings />} />
@@ -42,7 +44,7 @@ function FormLayout() {
   return (
     <>
       <FormNav />
-      <div className="container margin-top-large margin-bottom-large">
+      <div className="margin-top-large margin-bottom-large">
         <Outlet />
       </div>
     </>

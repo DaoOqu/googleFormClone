@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { formsReducer } from './formsSlice'
+import { userReducer } from "./userSlice"
 // import { responsesReducer } from './responsesSlice'
 // import { userReducer } from './userSlice'
 
@@ -7,7 +8,7 @@ export const store = configureStore({
   reducer: {
     forms: formsReducer,
     // responses: responsesReducer,
-    // user: userReducer,
+    user: userReducer,
   }
 })
 
