@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 import FormNav from './FormNav'
 import Forms from './Forms'
 import FormSettings from './FormSettings'
-import FormQuestions from './FormQuestions'
+import FormQuestionsLayout from './FormQuestions'
 import FormResponses from './FormResponses'
 import Account from './Account'
 import FormCreate from './FormCreate'
@@ -19,7 +19,7 @@ function App() {
           <Route path=":formId" element={<FormLayout />}>
             <Route index element={<Navigate to="settings" replace />} />
             <Route path="settings" element={<FormSettings />} />
-            <Route path="questions" element={<FormQuestions />} />
+            <Route path="questions" element={<FormQuestionsLayout />} />
             <Route path="responses" element={<FormResponses />} />
           </Route>
         </Route>

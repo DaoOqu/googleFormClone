@@ -29,7 +29,7 @@ export type Form = {
 }
 
 export type FormQuestion =
-  | { tag: 'shorText'; question: Question<ShortText> }
+  | { tag: 'shortText'; question: Question<ShortText> }
   | { tag: 'longText'; question: Question<LongText> }
   | { tag: 'singleChoice'; question: Question<SingleChoice> }
   | { tag: 'multipleChoice'; question: Question<MultipleChoice> }
@@ -38,7 +38,7 @@ export type FormQuestion =
 export type QuestionType = FormQuestion['tag']
 
 export const allQuestionTypes: Array<QuestionType> = [
-  'shorText',
+  'shortText',
   'longText',
   'singleChoice',
   'multipleChoice',

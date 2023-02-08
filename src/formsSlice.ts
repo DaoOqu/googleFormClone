@@ -18,6 +18,7 @@ export const formsSlice = createSlice({
           id: id,
           name: name,
           published: false,
+          questions: [],
         }
         state[id] = form
       },

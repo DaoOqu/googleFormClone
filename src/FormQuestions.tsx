@@ -30,7 +30,7 @@ type Params = {
   formId = FormId
 }
 
-function FormQuestions() {
+function FormQuestionsLayout() {
   const params= useParams() as Params
   const form = useAppSelector((state) => selectFormById(state, params.formId))
   
@@ -39,6 +39,24 @@ function FormQuestions() {
       {form.questions.map((formQuestion) => (
         <QuestionCard formQuestion={formQuestion} />
       ))}
+    </>
+  )
+}
+
+export function FormQuestionsList() {
+  const params = useParams() as Params
+  const form = useAppSelector((state) => selectFormById(state, params.formId))
+
+  return (
+    <>
+      {form.questions.map((formQuestion) => (
+        <QuestionCard
+          key={formQuestion.question.id}
+          formId={params.formId}
+          formQuestion={formQuestion}
+        />
+      ))}
+      <QuestionCreate formId={params.formId} />
     </>
   )
 }
@@ -110,6 +128,79 @@ function QuestionMetadata<T>(props: { question: Question<T> }) {
         {requiredElement}
       </p>
       {descriptorElement}
+    </>
+  )
+}
+
+function QuestionMetadataEdit<T>(props: {
+  question: Question<T>
+  onQuestionChange: (question: Question<T>) => void
+}) {
+  const { question, onQuestionChange } = props
+
+  const handleTitleChange: React.ChangeEventHandler<HTMLInputElement> = (e) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.title = e.target.value
+      })
+    )
+
+  const handleDescriptionChange: React.ChangeEventHandler<
+    HTMLTextAreaElement
+  > = (e) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.description = e.target.value
+      })
+    )
+
+  const handleRequiredChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.required = e.target.checked
+      })
+    )
+
+  return (
+    <>
+      <div className="form-group">
+        <label htmlFor="title">Title</label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          className="input-block"
+          value={question.title}
+          onChange={handleTitleChange}
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="description">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          className="input-block"
+          value={question.description || ''}
+          onChange={handleDescriptionChange}
+        ></textarea>
+      </div>
+      <fieldset className="form-group">
+        <label className="paper-switch-2">
+          <input
+            id="required"
+            name="required"
+            type="checkbox"
+            checked={question.required}
+            onChange={handleRequiredChange}
+          />
+          <span className="paper-switch-slider round" />
+        </label>
+        <label htmlFor="required" className="paper-switch-2-label">
+          Required
+        </label>
+      </fieldset>
     </>
   )
 }
@@ -336,5 +427,150 @@ function QuestionMultipleChoiceEdit(props: {
   )
 }
 
+function QuestionCreate(props: { formId: FormId }) {
+  const { formId } = props
+  const dispatch = useAppDispatch()
 
-export default FormQuestions
+  const [showQuestionCreate, setShowQuestionCreate] = useState(false)
+
+  const initialFormQuestion: FormQuestion = newFormQuestion('shortText')
+
+  const [questionType, setQuestionType] = useState<QuestionType>(
+    initialFormQuestion.tag
+  )
+  const handleQuestionTypeChanged: React.ChangeEventHandler<
+    HTMLSelectElement
+  > = (e) => {
+    const type = e.target.value as QuestionType
+    setQuestionType(type)
+    setFormQuestion(newFormQuestion(type))
+  }
+
+  const [formQuestion, setFormQuestion] =
+    useState<FormQuestion>(initialFormQuestion)
+
+  const resetForm = () => {
+    setQuestionType(initialFormQuestion.tag)
+    setFormQuestion(initialFormQuestion)
+  }
+
+  const handleCancel: React.MouseEventHandler = (e) => {
+    e.preventDefault()
+    setShowQuestionCreate(false)
+    resetForm()
+  }
+
+  const handleSubmit: React.FormEventHandler = (e) => {
+    e.preventDefault()
+    setShowQuestionCreate(false)
+    resetForm()
+
+    dispatch(questionAdded(formId, formQuestion))
+  }
+
+  if (!showQuestionCreate) {
+    return (
+      <p className="row flex-right">
+        <button
+          className="btn-primary"
+          onClick={() => setShowQuestionCreate(true)}
+        >
+          Add question
+        </button>
+      </p>
+    )
+  }
+
+  const renderQuestion = (): JSX.Element => {
+    switch (formQuestion.tag) {
+      case 'shortText':
+        return (
+          <QuestionShortTextEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'shortText', question: question })
+            }
+          />
+        )
+      case 'longText':
+        return (
+          <QuestionLongTextEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'longText', question: question })
+            }
+          />
+        )
+      case 'singleChoice':
+        return (
+          <QuestionSingleChoiceEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'singleChoice', question: question })
+            }
+          />
+        )
+      case 'multipleChoice':
+        return (
+          <QuestionMultipleChoiceEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'multipleChoice', question: question })
+            }
+          />
+        )
+      case 'scale':
+        return (
+          <QuestionScaleEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'scale', question: question })
+            }
+          />
+        )
+      default:
+        const _exhaustiveCheck: never = formQuestion
+        return _exhaustiveCheck
+    }
+  }
+
+  return (
+    <div className="card margin-bottom">
+      <div className="card-body">
+        <h5 className="card-subtitle">New question</h5>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="questionType">Question type</label>
+            <select
+              id="questionType"
+              value={questionType}
+              onChange={handleQuestionTypeChanged}
+            >
+              {allQuestionTypes.map((type) => (
+                <option key={type} value={type}>
+                  {showQuestionType(type)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {renderQuestion()}
+          <div className="row flex-right">
+            <input
+              type="button"
+              className="paper-btn margin-right"
+              onClick={handleCancel}
+              value="Cancel"
+            />
+            <input
+              type="submit"
+              className="paper-btn btn-primary"
+              value="Add"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default FormQuestionsLayout
