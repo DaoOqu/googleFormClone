@@ -35,8 +35,18 @@ export type FormQuestion =
   | { tag: 'multipleChoice'; question: Question<MultipleChoice> }
   | { tag: 'scale'; question: Question<Scale> }
 
+export type QuestionType = FormQuestion['tag']
+
+export const allQuestionTypes: Array<QuestionType> = [
+  'shorText',
+  'longText',
+  'singleChoice',
+  'multipleChoice',
+  'scale',
+]
 
 export type Question<T> = {
+  id: QuestionId
   title: string
   description: string | null
   required: boolean
@@ -46,6 +56,11 @@ export type Question<T> = {
 export type ShortText = null
 
 export type LongText = null
+
+export type Choice = {
+  id: ChoiceId
+  value: string
+}
 
 export type SingleChoice = Array<string>
 
