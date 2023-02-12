@@ -1,23 +1,23 @@
-import { customAlphabet } from "nanoid";
+import { customAlphabet } from 'nanoid'
 
 const nanoid = customAlphabet(
   '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
   11
 )
 
-export type FormId = string;
-export type ChoiceId = string;
-export type QuestionId = string;
+export type FormId = string
+export type QuestionId = string
+export type ChoiceId = string
 
 export const generateFormId = (): FormId => {
   return nanoid()
 }
 
-export const generateQuestionId = (): FormId => {
+export const generateQuestionId = (): QuestionId => {
   return nanoid()
 }
 
-export const generateChoiceId = (): FormId => {
+export const generateChoiceId = (): ChoiceId => {
   return nanoid()
 }
 
@@ -62,9 +62,9 @@ export type Choice = {
   value: string
 }
 
-export type SingleChoice = Array<string>
+export type SingleChoice = Array<Choice>
 
-export type MultipleChoice = Array<string>
+export type MultipleChoice = Array<Choice>
 
 export type Scale = {
   start: number
