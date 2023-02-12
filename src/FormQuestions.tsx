@@ -27,19 +27,45 @@ import { useAppDispatch, useAppSelector } from './hooks'
 import Code from './Code'
 
 type Params = {
-  formId = FormId
+  formId: FormId
 }
 
-function FormQuestionsLayout() {
-  const params= useParams() as Params
+export function FormQuestionsLayout() {
+  const params = useParams() as Params
   const form = useAppSelector((state) => selectFormById(state, params.formId))
-  
+
+  if (form.questions.length === 0) {
+    return (
+      <>
+        <p>Your form doesn't have any questions yet.</p>
+        <QuestionCreate formId={params.formId} />
+      </>
+    )
+  }
+
   return (
     <>
-      {form.questions.map((formQuestion) => (
-        <QuestionCard formQuestion={formQuestion} />
-      ))}
+      <FormQuestionsNav questionsCount={form.questions.length} />
+      <Outlet />
     </>
+  )
+}
+
+function FormQuestionsNav(props: { questionsCount: number }) {
+  return (
+    <nav className="subnav row flex-edges flex-middle">
+      <div>
+        Questions: <strong>{props.questionsCount}</strong>
+      </div>
+      <ul className="inline">
+        <li>
+          <NavLink to="list">List</NavLink>
+        </li>
+        <li>
+          <NavLink to="yaml">YAML</NavLink>
+        </li>
+      </ul>
+    </nav>
   )
 }
 
@@ -64,13 +90,13 @@ export function FormQuestionsList() {
 function showQuestionType(questionType: QuestionType): string {
   switch (questionType) {
     case 'shortText':
-      return 'Short Text'
+      return 'Short text'
     case 'longText':
-      return 'Long Text'
+      return 'Long text'
     case 'singleChoice':
-      return 'Single Choice'
+      return 'Single choice'
     case 'multipleChoice':
-      return 'Multiple Choice'
+      return 'Multiple choice'
     case 'scale':
       return 'Scale'
     default:
@@ -79,25 +105,73 @@ function showQuestionType(questionType: QuestionType): string {
   }
 }
 
-function QuestionCard(props: { formQuestion: FormQuestion }) {
+function QuestionCard(props: { formId: FormId; formQuestion: FormQuestion }) {
+  const dispatch = useAppDispatch()
+
   const { formQuestion } = props
 
-  const renderQuestion = (): JSX.Element => {
+  const [showQuestionEdit, setQuestionEdit] = useState(false)
+
+  let renderQuestion = (): JSX.Element => {
     switch (formQuestion.tag) {
       case 'shortText':
-        return <QuestionShortText question={formQuestion.question}/>
+        return <QuestionShortText question={formQuestion.question} />
       case 'longText':
-        return <QuestionLongText question={formQuestion.question}/>
+        return <QuestionLongText question={formQuestion.question} />
       case 'singleChoice':
-        return <QuestionSingleChoice question={formQuestion.question}/>
+        return <QuestionSingleChoice question={formQuestion.question} />
       case 'multipleChoice':
-        return <QuestionMultipleChoice question={formQuestion.question}/>
+        return <QuestionMultipleChoice question={formQuestion.question} />
       case 'scale':
-        return <QuestionScale question={formQuestion.question}/>
+        return <QuestionScale question={formQuestion.question} />
       default:
         const _exhaustiveCheck: never = formQuestion
         return _exhaustiveCheck
     }
+  }
+
+  let editButton: JSX.Element | null = (
+    <div className="text-right">
+      <a
+        href="#"
+        className="inline-block"
+        onClick={(e) => {
+          e.preventDefault()
+          setQuestionEdit(true)
+        }}
+      >
+        Edit
+      </a>
+    </div>
+  )
+
+  if (showQuestionEdit) {
+    renderQuestion = () => (
+      <QuestionEdit
+        formQuestion={props.formQuestion}
+        onCancel={() => setQuestionEdit(false)}
+        onSubmit={(formQuestion) => {
+          setQuestionEdit(false)
+          dispatch(
+            questionUpdated({
+              formId: props.formId,
+              formQuestion: formQuestion,
+            })
+          )
+        }}
+        onDelete={() => {
+          setQuestionEdit(false)
+          dispatch(
+            questionDeleted({
+              formId: props.formId,
+              questionId: props.formQuestion.question.id,
+            })
+          )
+        }}
+      />
+    )
+
+    editButton = null
   }
 
   return (
@@ -105,6 +179,7 @@ function QuestionCard(props: { formQuestion: FormQuestion }) {
       <div className="card-body">
         <h5 className="card-subtitle">{showQuestionType(formQuestion.tag)}</h5>
         {renderQuestion()}
+        {editButton}
       </div>
     </div>
   )
@@ -115,11 +190,12 @@ function QuestionMetadata<T>(props: { question: Question<T> }) {
 
   const requiredElement = question.required ? (
     <span className="text-danger"> *</span>
-  ): null
+  ) : null
 
-  const descriptorElement = question.description && question.description !== '' ? (
-    <p className="text-small text-muted">{question.description}</p>
-  ): null
+  const descriptionElement =
+    question.description && question.description !== '' ? (
+      <p className="text-small text-muted">{question.description}</p>
+    ) : null
 
   return (
     <>
@@ -127,7 +203,7 @@ function QuestionMetadata<T>(props: { question: Question<T> }) {
         {question.title}
         {requiredElement}
       </p>
-      {descriptorElement}
+      {descriptionElement}
     </>
   )
 }
@@ -427,6 +503,272 @@ function QuestionMultipleChoiceEdit(props: {
   )
 }
 
+function NewChoice(props: { onAddChoice: (choice: Choice) => void }) {
+  const [choiceValue, setChoiceValue] = useState('')
+  const handleChoiceValueChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => setChoiceValue(e.target.value)
+
+  const handleAddChoice: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault()
+    setChoiceValue('')
+    props.onAddChoice({
+      id: generateChoiceId(),
+      value: choiceValue,
+    })
+  }
+
+  return (
+    <div className="form-group">
+      <input
+        type="text"
+        className="inline-block"
+        placeholder="New choice"
+        value={choiceValue}
+        onChange={handleChoiceValueChange}
+      />
+      <button
+        className="btn-small btn-primary margin-left-small"
+        onClick={handleAddChoice}
+      >
+        Add choice
+      </button>
+    </div>
+  )
+}
+
+function QuestionScale(props: { question: Question<Scale> }) {
+  const definition = props.question.definition
+  return (
+    <>
+      <QuestionMetadata question={props.question} />
+      <div className="form-group">
+        <div className="row">
+          <div className="col sm-3 text-right">
+            {`${definition.startLabel} (${definition.start})`}
+          </div>
+          <div className="col sm-6">
+            <input
+              className="input-block"
+              type="range"
+              min={definition.start}
+              max={definition.end}
+            />
+          </div>
+          <div className="col sm-3">
+            {`(${definition.end}) ${definition.endLabel}`}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function QuestionScaleEdit(props: {
+  question: Question<Scale>
+  onQuestionChange: (question: Question<Scale>) => void
+}) {
+  const { question, onQuestionChange } = props
+  const definition = question.definition
+
+  const handleStartChange: React.ChangeEventHandler<HTMLInputElement> = (e) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.definition.start = e.target.valueAsNumber
+      })
+    )
+
+  const handleEndChange: React.ChangeEventHandler<HTMLInputElement> = (e) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.definition.end = e.target.valueAsNumber
+      })
+    )
+
+  const handleStartLabelChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.definition.startLabel = e.target.value
+      })
+    )
+
+  const handleEndLabelChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) =>
+    onQuestionChange(
+      produce(question, (draft) => {
+        draft.definition.endLabel = e.target.value
+      })
+    )
+
+  return (
+    <>
+      <QuestionMetadataEdit
+        question={question}
+        onQuestionChange={onQuestionChange}
+      />
+      <div className="row">
+        <div className="col sm-4 padding-none">
+          <div className="form-group">
+            <label htmlFor="start">Start</label>
+            <input
+              type="number"
+              id="start"
+              name="start"
+              className="input-block"
+              value={definition.start}
+              onChange={handleStartChange}
+            />
+          </div>
+        </div>
+        <div className="col sm-8 padding-none">
+          <div className="form-group">
+            <label htmlFor="startLabel">Start label</label>
+            <input
+              type="text"
+              id="startLabel"
+              name="startLabel"
+              className="input-block"
+              value={definition.startLabel}
+              onChange={handleStartLabelChange}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col sm-4 padding-none">
+          <div className="form-group">
+            <label htmlFor="end">End</label>
+            <input
+              type="number"
+              id="end"
+              name="end"
+              className="input-block"
+              value={definition.end}
+              onChange={handleEndChange}
+            />
+          </div>
+        </div>
+        <div className="col sm-8 padding-none">
+          <div className="form-group">
+            <label htmlFor="endLabel">End label</label>
+            <input
+              type="text"
+              id="endLabel"
+              name="endLabel"
+              className="input-block"
+              value={definition.endLabel}
+              onChange={handleEndLabelChange}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function QuestionEdit(props: {
+  formQuestion: FormQuestion
+  onCancel: () => void
+  onSubmit: (formQuestion: FormQuestion) => void
+  onDelete: () => void
+}) {
+  const [formQuestion, setFormQuestion] = useState(props.formQuestion)
+
+  const handleCancel: React.MouseEventHandler = (e) => {
+    e.preventDefault()
+    props.onCancel()
+  }
+
+  const handleSubmit: React.FormEventHandler = (e) => {
+    e.preventDefault()
+    props.onSubmit(formQuestion)
+  }
+
+  const handleDelete: React.MouseEventHandler = (e) => {
+    e.preventDefault()
+    props.onDelete()
+  }
+
+  const renderQuestion = (): JSX.Element => {
+    switch (formQuestion.tag) {
+      case 'shortText':
+        return (
+          <QuestionShortTextEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'shortText', question: question })
+            }
+          />
+        )
+      case 'longText':
+        return (
+          <QuestionLongTextEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'longText', question: question })
+            }
+          />
+        )
+      case 'singleChoice':
+        return (
+          <QuestionSingleChoiceEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'singleChoice', question: question })
+            }
+          />
+        )
+      case 'multipleChoice':
+        return (
+          <QuestionMultipleChoiceEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'multipleChoice', question: question })
+            }
+          />
+        )
+      case 'scale':
+        return (
+          <QuestionScaleEdit
+            question={formQuestion.question}
+            onQuestionChange={(question) =>
+              setFormQuestion({ tag: 'scale', question: question })
+            }
+          />
+        )
+      default:
+        const _exhaustiveCheck: never = formQuestion
+        return _exhaustiveCheck
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {renderQuestion()}
+      <div className="row flex-edges">
+        <input
+          type="button"
+          className="paper-btn btn-danger"
+          onClick={handleDelete}
+          value="Delete"
+        />
+        <div>
+          <input
+            type="button"
+            className="paper-btn margin-right"
+            onClick={handleCancel}
+            value="Cancel"
+          />
+          <input type="submit" className="paper-btn btn-primary" value="Save" />
+        </div>
+      </div>
+    </form>
+  )
+}
+
 function QuestionCreate(props: { formId: FormId }) {
   const { formId } = props
   const dispatch = useAppDispatch()
@@ -462,6 +804,7 @@ function QuestionCreate(props: { formId: FormId }) {
 
   const handleSubmit: React.FormEventHandler = (e) => {
     e.preventDefault()
+
     setShowQuestionCreate(false)
     resetForm()
 
@@ -573,4 +916,77 @@ function QuestionCreate(props: { formId: FormId }) {
   )
 }
 
-export default FormQuestionsLayout
+const newFormQuestion = (questionType: QuestionType): FormQuestion => {
+  switch (questionType) {
+    case 'shortText':
+      return {
+        tag: 'shortText',
+        question: {
+          id: '<new>',
+          title: '',
+          description: '',
+          required: true,
+          definition: null,
+        },
+      }
+    case 'longText':
+      return {
+        tag: 'longText',
+        question: {
+          id: '<new>',
+          title: '',
+          description: '',
+          required: true,
+          definition: null,
+        },
+      }
+    case 'singleChoice':
+      return {
+        tag: 'singleChoice',
+        question: {
+          id: '<new>',
+          title: '',
+          description: '',
+          required: true,
+          definition: [],
+        },
+      }
+    case 'multipleChoice':
+      return {
+        tag: 'multipleChoice',
+        question: {
+          id: '<new>',
+          title: '',
+          description: '',
+          required: true,
+          definition: [],
+        },
+      }
+    case 'scale':
+      return {
+        tag: 'scale',
+        question: {
+          id: '<new>',
+          title: '',
+          description: '',
+          required: true,
+          definition: {
+            start: 1,
+            end: 5,
+            startLabel: '',
+            endLabel: '',
+          },
+        },
+      }
+    default:
+      const _exhaustiveCheck: never = questionType
+      return _exhaustiveCheck
+  }
+}
+
+export function FormQuestionsYaml() {
+  const params = useParams() as Params
+  const form = useAppSelector((state) => selectFormById(state, params.formId))
+
+  return <Code language="yaml" code={yaml.dump(form.questions)} />
+}

@@ -1,28 +1,44 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { FormId } from './form'
+import { responsesData, statisticsData } from './data'
 import { RootState } from './store'
-import { formsData } from './data'
-import { Form, FormId } from './form'
+import { QuestionStatistics } from './statistics'
 
-type FormsState = { [key: FormId]: Form };
+type ResponsesState = { [key: FormId]: FormResponses }
 
-const initialState: FormsState = formsData
+export type FormResponses = {
+  header: Array<string>
+  responses: Array<Array<string>>
+  statistics: Array<QuestionStatistics>
+}
 
-export const formsSlice = createSlice({
-  name: 'forms',
+const initialState: ResponsesState = Object.fromEntries(
+  Object.entries(responsesData).map(([key, rows]) => [
+    key,
+    {
+      // First row contains header
+      header: rows.length > 0 ? rows[0] : [],
+      responses: rows.slice(1),
+      statistics: statisticsData[key],
+    },
+  ])
+)
+
+export const reponsesSlice = createSlice({
+  name: 'responses',
   initialState,
   reducers: {},
 })
 
-// export const selectFormById = (state: RootState, id: FormId): Form => {
-//   const result = state.forms[id];
-//   if (!result) {
-//     throw new Error(`Expected to find form with id: ${id}`);
-//   }
-//   return result;
-// }
+export const selectFormResponses = (
+  state: RootState,
+  id: FormId
+): FormResponses => {
+  const result = state.responses[id]
+  if (!result) {
+    throw new Error(`Expected to find responses for form with id ${id}`)
+  }
+  return result
+}
 
-// export const selectallFormsSortByName = (state: RootState): Array<Form> => {
-//   return Object.values(state.forms).sort((a, b) => a.name.localeCompare(b.name));
-// }
-
-export const formsReducer = formsSlice.reducer
+export const responsesReducer = reponsesSlice.reducer
