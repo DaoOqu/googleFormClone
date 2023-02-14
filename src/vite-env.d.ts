@@ -11,3 +11,7 @@ declare module '*.csv' {
   const data: any
   export default data
 }
+
+declare module 'chart.xkcd'
+declare module 'js-yaml'
+declare module 'prismjs/components/*'
