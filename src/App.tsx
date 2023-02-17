@@ -1,11 +1,20 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Navbar from './Navbar'
-import FormNav from './FormNav'
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import Forms from './Forms'
-import FormSettings from './FormSettings'
-import FormQuestionsLayout from './FormQuestions'
-import FormResponses from './FormResponses'
 import Account from './Account'
+import FormSettings from './FormSettings'
+import {
+  FormQuestionsLayout,
+  FormQuestionsList,
+  FormQuestionsYaml,
+} from './FormQuestions'
+import {
+  FormResponsesLayout,
+  FormResponsesStatistics,
+  FormResponsesTable,
+  FormResponsesCsv,
+} from './FormResponses'
+import FormNav from './FormNav'
 import FormCreate from './FormCreate'
 
 function App() {
@@ -19,11 +28,21 @@ function App() {
           <Route path=":formId" element={<FormLayout />}>
             <Route index element={<Navigate to="settings" replace />} />
             <Route path="settings" element={<FormSettings />} />
-            <Route path="questions" element={<FormQuestionsLayout />} />
-            <Route path="responses" element={<FormResponses />} />
+            <Route path="questions" element={<FormQuestionsLayout />}>
+              <Route index element={<Navigate to="list" replace />} />
+              <Route path="list" element={<FormQuestionsList />} />
+              <Route path="yaml" element={<FormQuestionsYaml />} />
+            </Route>
+            <Route path="responses" element={<FormResponsesLayout />}>
+              <Route index element={<Navigate to="table" replace />} />
+              <Route path="table" element={<FormResponsesTable />} />
+              <Route path="statistics" element={<FormResponsesStatistics />} />
+              <Route path="csv" element={<FormResponsesCsv />} />
+            </Route>
           </Route>
         </Route>
         <Route path="account" element={<Account />} />
+        {/* <Route path="about" element={<About />} /> */}
       </Route>
     </Routes>
   )

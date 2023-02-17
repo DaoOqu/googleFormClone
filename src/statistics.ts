@@ -6,7 +6,7 @@ export type QuestionStatistics =
   | { tag: 'scale'; statistics: Statistics<Scale> }
 
 export type Statistics<T> = {
-  questiondId: QuestionId
+  questionId: QuestionId
   title: string
   data: T
 }
@@ -16,5 +16,5 @@ export type Pie = Array<{ label: string; value: number}>
 export type Scale = { 
   startLabel: string
   endLabel: string
-  values: Array<{ label: string; value: number}>
+  values: Array<{ label: string; value: number }>
 }
