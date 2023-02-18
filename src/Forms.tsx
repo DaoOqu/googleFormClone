@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 import FormList from './FormList'
-import { selectallFormsSortByName } from './formsSlice'
+import { selectAllFormsSortByName } from './formsSlice'
 import { useAppSelector } from './hooks'
 
 function Forms() {
-  const forms = useAppSelector(selectallFormsSortByName)
+  const forms = useAppSelector(selectAllFormsSortByName)
   return (
     <>
       {forms.length === 0 ? <p>You don't have any forms created yet.</p> : null}

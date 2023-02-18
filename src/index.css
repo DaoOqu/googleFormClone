@@ -45,6 +45,12 @@ nav a.active {
   overflow-x: scroll;
 }
 
+/* Code Blocks */
+
+code[class*="language-"], pre[class*="language-"] {
+  font-size: 16px;
+}
+
 .table-scroll th, .table-scroll td {
   max-width: 200px;
   overflow: hidden;

@@ -14,4 +14,5 @@ declare module '*.csv' {
 
 declare module 'chart.xkcd'
 declare module 'js-yaml'
+declare module 'prismjs'
 declare module 'prismjs/components/*'

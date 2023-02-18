@@ -1,5 +1,4 @@
 import { NavLink, Outlet, useParams } from 'react-router-dom'
-import chartXkcd from 'chart.xkcd'
 import { stringify } from 'csv-stringify/browser/esm/sync'
 import { FormId } from './form'
 import { useAppSelector } from './hooks'
@@ -7,6 +6,7 @@ import { selectFormResponses } from './responsesSlice'
 import { BarChart, PieChart } from './chart'
 import { QuestionStatistics } from './statistics'
 import Code from './Code'
+import chartXkcd from 'chart.xkcd'
 
 type Params = {
   formId: FormId

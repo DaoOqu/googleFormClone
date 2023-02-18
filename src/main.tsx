@@ -7,6 +7,7 @@ import { store } from './store'
 
 import './index.css'
 import 'papercss'
+import 'prismjs/themes/prism.css'
 
 const container = document.getElementById('root')
 const root = createRoot(container!)

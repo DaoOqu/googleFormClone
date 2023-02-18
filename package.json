@@ -14,10 +14,12 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.2",
+    "chart.xkcd": "^1.1.13",
     "csv-stringify": "^6.2.4",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.0np",
     "nanoid": "^4.0.0",
     "papercss": "^1.9.1",
+    "prismjs": "^1.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
