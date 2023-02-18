@@ -1,8 +1,8 @@
-# Google Form Clone (WIP)
+# Google Form Clone
 
 The purpose of this project aims to make a "clone" of the popular Google Form
 
-This will not be a 1:1 clone but instead will have it's own defining characteristics with similar functionality
+This will not be a 1:1 clone but instead will have it's own defining characteristics with separate form options
 
 ## How to Run
 
